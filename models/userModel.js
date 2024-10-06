@@ -7,34 +7,32 @@ const userSchema = new mongoose.Schema({
     username: {
         type: String,
         unique: true,
+        required: true,
     },
     password: {
         type: String,
+        required: true,
     },
     email: {
         type: String,
+        unique: true,
+        required: true,
     },
-    favoritePosts: {
-        type: [{
-            type: [mongoose.Schema.Types.ObjectId],
-            ref: 'Post',
-        }]
-    }
-    // {
-    //     toJSON: {virtuals: true},
-    //     toObject: {virtuals: true}}
+    favoritePosts: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Post',
+    }]
+}, {
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true }
 })
 
-// userSchema.virtual('allPostByUser', {
-//     ref: "Post",
-//     localField: __id,
-//     foreignField: "author"
-
-// }), 
-
-userSchema.virtual("allPostsByUser").get(function (){
-    return `I return all ${this.name} posts`
-})
+userSchema.virtual('allPostByUser', {
+    ref: "Post",
+    localField: "_id",
+    foreignField: "author",
+    justOne: false
+}), 
 
 userSchema.method('reset', function(email){
     if(!email){

@@ -4,7 +4,7 @@ import UserModel from "../models/userModel.js"
 
 export async function getAllUsers(request, response) {
     try {
-        const users = await UserModel.find();
+        const users = await UserModel.find().populate("favoritePosts").populate("allPostByUser");
         if(!users.length) return response.status(404).json({message: "No users found in the database."});
         response.status(200).json(users); 
     } catch (error) {
@@ -28,7 +28,7 @@ export async function getUserById(request, response) {
     try {
         const id = request.params.id;
         if(!mongoose.Types.ObjectId.isValid(id)) return response.status(400).json({message: "Invalid ID format."});     
-        const user = await UserModel.findById(id);
+        const user = await UserModel.findById(id).populate("favoritePosts").populate("allPostByUser");
         if(!user) return response.status(404).json({message: `User with ID: ${id} not found.`});
         response.status(200).json(user)    
     } catch (error) {
@@ -41,7 +41,14 @@ export async function updateUserById(request, response) {
         const id = request.params.id;
         const newData = request.body;
         if(!mongoose.Types.ObjectId.isValid(id) || !newData) return response.status(400).json({message: "Invalid ID or data format."});
-        const updatedUser = await UserModel.findByIdAndUpdate(id, newData, {new: true});
+        let updatedUser;
+        if(newData.favoritePosts){
+            updatedUser = await UserModel.findById(id)
+            updatedUser.favoritePosts.push(newData.favoritePosts)
+            updatedUser.save()
+        }else{
+            updatedUser = await UserModel.findByIdAndUpdate(id, newData, {new: true});
+        }
         if(!updatedUser) return response.status(404).json({message: `User with ID: ${id} not found.`});
         response.status(200).json({message: `User with ID: ${id} successfully updated.`, data: `${updatedUser}`})
     } catch (error) {

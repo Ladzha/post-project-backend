@@ -6,10 +6,17 @@ const categorySchema = new mongoose.Schema({
         required: true,
         minLength: 3,
     }
+}, {
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true }
 })
 
-categorySchema.virtual("allPosts").get(function (){
-    return "I return all posts in this category"
-})
+categorySchema.virtual('allPostByCategory', {
+    ref: "Post",
+    localField: "_id",
+    foreignField: "categories",
+    justOne: false
+});
+
 
 export default mongoose.model("Category", categorySchema)

@@ -3,7 +3,7 @@ import CategoryModel from "../models/categoryModel.js"
 
 export async function getAllCategories(request, response) {
     try {
-        const categories = await CategoryModel.find();
+        const categories = await CategoryModel.find().populate("allPostByCategory");
         if(!categories.length) return response.status(404).json({message: "No categories found in the database."});
         response.status(200).json(categories); 
     } catch (error) {
@@ -27,7 +27,7 @@ export async function getCategoryById(request, response) {
     try {
         const id = request.params.id;
         if(!mongoose.Types.ObjectId.isValid(id)) return response.status(400).json({message: "Invalid ID format."});     
-        const category = await CategoryModel.findById(id);
+        const category = await CategoryModel.findById(id).populate("allPostByCategory");
         if(!category) return response.status(404).json({message: `Category with ID: ${id} not found.`});
         response.status(200).json(category)    
     } catch (error) {
